@@ -27,9 +27,9 @@ Controlled Google Drive video sharing with session-locked secure links.
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
    APP_URL=http://localhost:3000
 
-   GOOGLE_CLIENT_ID=your_google_oauth_client_id
-   GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
-   GOOGLE_REDIRECT_URI=http://localhost:3000/api/google/auth/callback
+   # Paste the full JSON from the service account key OR provide a path.
+   GOOGLE_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
+   # GOOGLE_SERVICE_ACCOUNT_JSON_PATH=/path/to/service-account.json
    ```
 
 5. Run dev server:
@@ -37,10 +37,19 @@ Controlled Google Drive video sharing with session-locked secure links.
    npm run dev
    ```
 
+## Google Drive Service Account Setup
+
+1. Go to Google Cloud Console → APIs & Services.
+2. Create a new **Service Account**.
+3. Enable **Google Drive API** for the project.
+4. Download the JSON key for the service account.
+5. Share the Drive folder (or files) with the service account **client_email**.
+6. Add the JSON content to Vercel (or local `.env`) as `GOOGLE_SERVICE_ACCOUNT_JSON`.
+
 ## Admin Dashboard (User A)
 - Visit: `http://localhost:3000/admin`
-- Click **Connect Google Drive** once (OAuth)
-- Browse folders and pick a video (or paste a Drive link manually)
+- Service account status shows **Connected** when configured
+- Browse folders shared with the service account and pick a video (or paste a Drive link manually)
 - (Optional) Add a title
 - Use **Create Link** to generate a session-locked viewer link (copied to clipboard)
 
@@ -55,22 +64,9 @@ Controlled Google Drive video sharing with session-locked secure links.
 - The token is locked to that session on first access.
 - Any other browser/session will receive a 403.
 
-## Google Drive OAuth Setup
-
-1. Go to Google Cloud Console → APIs & Services → Credentials.
-2. Create OAuth Client ID (Web application).
-3. Add Authorized redirect URI:
-   - `http://localhost:3000/api/google/auth/callback`
-   - `https://your-domain.com/api/google/auth/callback`
-4. Enable APIs:
-   - Google Drive API
-
-Add the client ID/secret to `.env` (see setup above).
-
 ## Notes / Drive Access
-- OAuth lets you stream **private** Drive videos without making them public.
-- The first time you connect, Google returns a refresh token (stored in Supabase).
-- Streaming now uses Drive API with range support.
+- The service account only sees files/folders explicitly shared with it.
+- Streaming uses Drive API with range support.
 
 ## Testing Checklist for समीर
 

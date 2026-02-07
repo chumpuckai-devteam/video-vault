@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
   }
 
   let sessionId = await getSessionId();
-  let response: NextResponse;
 
   if (!sessionId) {
     sessionId = crypto.randomUUID();
@@ -56,7 +55,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Video not found" }, { status: 404 });
   }
 
-  response = NextResponse.json({
+  const response = NextResponse.json({
     video: {
       id: video.id,
       title: video.title,

@@ -13,7 +13,7 @@ type Video = {
 
 type DriveStatus = {
   connected: boolean;
-  expiresAt: string | null;
+  error?: string | null;
 };
 
 export default function AdminPage() {
@@ -131,22 +131,22 @@ export default function AdminPage() {
               <h2 className="text-lg font-semibold">Google Drive</h2>
               <p className="text-sm text-zinc-600">
                 {driveStatus?.connected
-                  ? "Connected. You can browse private Drive videos."
-                  : "Connect once to browse your Drive securely."}
+                  ? "Service account connected. You can browse shared Drive videos."
+                  : "Service account not configured. Add credentials to enable Drive browsing."}
               </p>
+              {!driveStatus?.connected && driveStatus?.error && (
+                <p className="text-xs text-red-600">{driveStatus.error}</p>
+              )}
             </div>
-            <a
-              href="/api/google/auth/start"
-              className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-sm text-white"
-            >
-              {driveStatus?.connected ? "Reconnect Drive" : "Connect Google Drive"}
-            </a>
+            <div className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+              {driveStatus?.connected ? "Service Account Connected" : "Not Connected"}
+            </div>
           </div>
           {driveStatus?.connected && (
             <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
               <h3 className="text-sm font-semibold">Pick a video</h3>
               <p className="text-xs text-zinc-500">
-                Browse folders and select a video. We’ll save the file ID automatically.
+                Browse folders shared with the service account and select a video.
               </p>
               <div className="mt-3">
                 <DrivePicker onSelect={onSelectDriveVideo} />

@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { getStoredDriveToken } from "../../../../lib/googleDrive";
+import { getDriveConnectionStatus } from "../../../../lib/googleDrive";
 
 export const runtime = "nodejs";
 
 export async function GET() {
-  const stored = await getStoredDriveToken();
-  const connected = Boolean(stored?.refresh_token);
+  const status = await getDriveConnectionStatus();
 
   return NextResponse.json({
-    connected,
-    expiresAt: stored?.expires_at ?? null,
+    connected: status.connected,
+    error: status.connected ? null : status.error,
   });
 }
