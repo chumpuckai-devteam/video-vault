@@ -42,7 +42,17 @@ export async function GET(request: NextRequest) {
 
     data = await tokenResponse.json();
   } catch (err) {
-    console.error("Google token exchange failed", err);
+    const errAny = err as any;
+    console.error("Google token exchange failed", {
+      message: errAny?.message,
+      name: errAny?.name,
+      code: errAny?.code,
+      cause: errAny?.cause,
+    });
+    console.error("Token exchange config", {
+      clientId: clientId?.slice(0, 12) + "…",
+      redirectUri,
+    });
     const errorUrl = new URL("/admin", baseUrl || request.nextUrl.origin);
     errorUrl.searchParams.set("drive", "error");
     errorUrl.searchParams.set("reason", "token_fetch_failed");
