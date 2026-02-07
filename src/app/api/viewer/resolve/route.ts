@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { supabaseServer } from "../../../../lib/supabaseServer";
 
-function getSessionId() {
-  const cookieStore = cookies();
+async function getSessionId() {
+  const cookieStore = await cookies();
   return cookieStore.get("vv_session")?.value ?? null;
 }
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid or expired link." }, { status: 404 });
   }
 
-  let sessionId = getSessionId();
+  let sessionId = await getSessionId();
   let response: NextResponse;
 
   if (!sessionId) {
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  if (!getSessionId()) {
+  if (!(await getSessionId())) {
     response.cookies.set({
       name: "vv_session",
       value: sessionId,
