@@ -30,15 +30,26 @@ export async function GET(request: NextRequest) {
     grant_type: "authorization_code",
   });
 
-  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
+  let tokenResponse: Response;
+  let data: any;
+  try {
+    tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    });
 
-  const data = await tokenResponse.json();
+    data = await tokenResponse.json();
+  } catch (err) {
+    console.error("Google token exchange failed", err);
+    const errorUrl = new URL("/admin", baseUrl || request.nextUrl.origin);
+    errorUrl.searchParams.set("drive", "error");
+    errorUrl.searchParams.set("reason", "token_fetch_failed");
+    return NextResponse.redirect(errorUrl);
+  }
 
   if (!tokenResponse.ok) {
+    console.error("Google token exchange error", data);
     const errorUrl = new URL("/admin", baseUrl || request.nextUrl.origin);
     errorUrl.searchParams.set("drive", "error");
     errorUrl.searchParams.set("reason", data.error || "token_exchange_failed");
