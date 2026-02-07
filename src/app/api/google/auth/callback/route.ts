@@ -8,14 +8,20 @@ export async function GET(request: NextRequest) {
   const error = request.nextUrl.searchParams.get("error");
 
   if (error) {
-    return NextResponse.redirect(`/admin?drive=error&reason=${encodeURIComponent(error)}`);
+    const errorUrl = new URL("/admin", baseUrl || request.nextUrl.origin);
+    errorUrl.searchParams.set("drive", "error");
+    errorUrl.searchParams.set("reason", error);
+    return NextResponse.redirect(errorUrl);
   }
 
   if (!code) {
-    return NextResponse.redirect(`/admin?drive=error&reason=missing_code`);
+    const errorUrl = new URL("/admin", baseUrl || request.nextUrl.origin);
+    errorUrl.searchParams.set("drive", "error");
+    errorUrl.searchParams.set("reason", "missing_code");
+    return NextResponse.redirect(errorUrl);
   }
 
-  const { clientId, clientSecret, redirectUri } = getGoogleOAuthConfig();
+  const { clientId, clientSecret, redirectUri, baseUrl } = getGoogleOAuthConfig();
 
   const body = new URLSearchParams({
     code,
@@ -34,7 +40,10 @@ export async function GET(request: NextRequest) {
   const data = await tokenResponse.json();
 
   if (!tokenResponse.ok) {
-    return NextResponse.redirect(`/admin?drive=error&reason=${encodeURIComponent(data.error || "token_exchange_failed")}`);
+    const errorUrl = new URL("/admin", baseUrl || request.nextUrl.origin);
+    errorUrl.searchParams.set("drive", "error");
+    errorUrl.searchParams.set("reason", data.error || "token_exchange_failed");
+    return NextResponse.redirect(errorUrl);
   }
 
   const refreshToken = data.refresh_token as string | undefined;
@@ -48,5 +57,7 @@ export async function GET(request: NextRequest) {
     expiresAt,
   });
 
-  return NextResponse.redirect("/admin?drive=connected");
+  const successUrl = new URL("/admin", baseUrl || request.nextUrl.origin);
+  successUrl.searchParams.set("drive", "connected");
+  return NextResponse.redirect(successUrl);
 }

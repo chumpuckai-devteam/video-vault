@@ -15,12 +15,13 @@ export function getGoogleOAuthConfig() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
 
   if (!clientId || !clientSecret || !redirectUri) {
     throw new Error("Missing GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, or GOOGLE_REDIRECT_URI");
   }
 
-  return { clientId, clientSecret, redirectUri };
+  return { clientId, clientSecret, redirectUri, baseUrl };
 }
 
 export async function getStoredDriveToken(): Promise<DriveTokenRow | null> {
