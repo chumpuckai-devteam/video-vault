@@ -16,7 +16,8 @@ async function resolveToken(token: string) {
     return { error: "Invalid or expired link." } as const;
   }
 
-  const sessionId = cookies().get("vv_session")?.value;
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get("vv_session")?.value;
   if (!sessionId || tokenRow.session_id !== sessionId) {
     return { error: "Session mismatch." } as const;
   }
