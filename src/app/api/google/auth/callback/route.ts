@@ -4,6 +4,7 @@ import { getGoogleOAuthConfig, upsertDriveToken } from "../../../../../lib/googl
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
+  const { clientId, clientSecret, redirectUri, baseUrl } = getGoogleOAuthConfig();
   const code = request.nextUrl.searchParams.get("code");
   const error = request.nextUrl.searchParams.get("error");
 
@@ -20,8 +21,6 @@ export async function GET(request: NextRequest) {
     errorUrl.searchParams.set("reason", "missing_code");
     return NextResponse.redirect(errorUrl);
   }
-
-  const { clientId, clientSecret, redirectUri, baseUrl } = getGoogleOAuthConfig();
 
   const body = new URLSearchParams({
     code,
