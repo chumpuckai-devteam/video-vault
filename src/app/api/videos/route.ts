@@ -10,6 +10,7 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.error("Supabase fetch error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
+    console.error("Supabase insert error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
