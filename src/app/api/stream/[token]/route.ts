@@ -34,8 +34,11 @@ async function resolveToken(token: string) {
   return { driveFileId: video.drive_file_id } as const;
 }
 
-export async function GET(request: NextRequest, { params }: { params: { token: string } }) {
-  const token = params.token;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  const { token } = await params;
   const resolved = await resolveToken(token);
 
   if ("error" in resolved) {
