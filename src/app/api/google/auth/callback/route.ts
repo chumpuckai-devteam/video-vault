@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
     tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
+      body: body.toString(),
+      cache: "no-store",
     });
 
     data = await tokenResponse.json();
