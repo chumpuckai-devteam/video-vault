@@ -30,13 +30,16 @@ Controlled Google Drive video sharing with session-locked secure links.
    FIREBASE_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
    # FIREBASE_SERVICE_ACCOUNT_JSON_PATH=/path/to/firebase-service-account.json
    APP_URL=http://localhost:3000
+   ADMIN_PASSWORD=your-secure-password
 
    # Paste the full JSON from the service account key OR provide a path.
    GOOGLE_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
    # GOOGLE_SERVICE_ACCOUNT_JSON_PATH=/path/to/service-account.json
    ```
 
-5. Run dev server:
+5. In Vercel, add `ADMIN_PASSWORD` in Project Settings → Environment Variables for Production/Preview/Development.
+
+6. Run dev server:
    ```bash
    npm run dev
    ```
