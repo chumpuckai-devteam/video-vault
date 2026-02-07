@@ -54,8 +54,9 @@ export async function GET(request: NextRequest) {
       redirectUri,
     });
     const errorUrl = new URL("/admin", baseUrl || request.nextUrl.origin);
+    const reason = errAny?.cause?.code || errAny?.code || errAny?.message || "token_fetch_failed";
     errorUrl.searchParams.set("drive", "error");
-    errorUrl.searchParams.set("reason", "token_fetch_failed");
+    errorUrl.searchParams.set("reason", `token_fetch_failed:${reason}`);
     return NextResponse.redirect(errorUrl);
   }
 
