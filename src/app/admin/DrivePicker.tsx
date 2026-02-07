@@ -13,6 +13,7 @@ type DriveBrowseResponse = {
   folderId: string;
   folders: DriveItem[];
   videos: DriveItem[];
+  error?: string;
 };
 
 type DrivePickerProps = {
