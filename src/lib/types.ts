@@ -12,3 +12,18 @@ export type TokenRecord = {
   session_id: string | null;
   created_at: string;
 };
+
+export type DriveFile = {
+  id: string;
+  name: string;
+  mimeType: string;
+  size?: string;
+  modifiedTime?: string;
+};
+
+export type DriveBrowseResponse = {
+  folderId: string;
+  folders: DriveFile[];
+  videos: DriveFile[];
+  error?: string;
+};
