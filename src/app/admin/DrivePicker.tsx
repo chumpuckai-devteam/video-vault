@@ -20,8 +20,11 @@ type DrivePickerProps = {
   onSelect: (file: DriveItem) => void;
 };
 
+const DEFAULT_FOLDER_ID =
+  (process.env.NEXT_PUBLIC_DRIVE_ROOT_FOLDER_ID || "").trim() || "root";
+
 export default function DrivePicker({ onSelect }: DrivePickerProps) {
-  const [stack, setStack] = useState<string[]>(["root"]);
+  const [stack, setStack] = useState<string[]>([DEFAULT_FOLDER_ID]);
   const [folders, setFolders] = useState<DriveItem[]>([]);
   const [videos, setVideos] = useState<DriveItem[]>([]);
   const [loading, setLoading] = useState(false);
