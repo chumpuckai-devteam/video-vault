@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { supabaseServer } from "../../../../lib/supabaseServer";
+import { getVideoById, getVideoToken, lockVideoTokenSession } from "../../../../lib/firestore";
 
 async function getSessionId() {
   const cookieStore = await cookies();
@@ -13,13 +13,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing token" }, { status: 400 });
   }
 
-  const { data: tokenRow, error: tokenError } = await supabaseServer
-    .from("video_tokens")
-    .select("token,video_id,session_id")
-    .eq("token", token)
-    .single();
-
-  if (tokenError || !tokenRow) {
+  const tokenRow = await getVideoToken(token);
+  if (!tokenRow) {
     return NextResponse.json({ error: "Invalid or expired link." }, { status: 404 });
   }
 
@@ -29,29 +24,13 @@ export async function GET(request: NextRequest) {
     sessionId = crypto.randomUUID();
   }
 
-  if (tokenRow.session_id && tokenRow.session_id !== sessionId) {
+  const locked = await lockVideoTokenSession(token, sessionId);
+  if (!locked) {
     return NextResponse.json({ error: "This link is locked to another session." }, { status: 403 });
   }
 
-  if (!tokenRow.session_id) {
-    const { error: lockError } = await supabaseServer
-      .from("video_tokens")
-      .update({ session_id: sessionId })
-      .eq("token", token)
-      .is("session_id", null);
-
-    if (lockError) {
-      return NextResponse.json({ error: "Unable to lock session." }, { status: 500 });
-    }
-  }
-
-  const { data: video, error: videoError } = await supabaseServer
-    .from("videos")
-    .select("id,title,drive_file_id")
-    .eq("id", tokenRow.video_id)
-    .single();
-
-  if (videoError || !video) {
+  const video = await getVideoById(tokenRow.video_id);
+  if (!video) {
     return NextResponse.json({ error: "Video not found" }, { status: 404 });
   }
 
@@ -76,4 +55,3 @@ export async function GET(request: NextRequest) {
 
   return response;
 }
-

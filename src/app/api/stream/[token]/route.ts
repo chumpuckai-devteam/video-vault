@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { supabaseServer } from "../../../../lib/supabaseServer";
+import { getVideoById, getVideoToken } from "../../../../lib/firestore";
 import { getDriveAccessToken } from "../../../../lib/googleDrive";
 
 export const runtime = "nodejs";
 
 async function resolveToken(token: string) {
-  const { data: tokenRow, error: tokenError } = await supabaseServer
-    .from("video_tokens")
-    .select("token,video_id,session_id")
-    .eq("token", token)
-    .single();
-
-  if (tokenError || !tokenRow) {
+  const tokenRow = await getVideoToken(token);
+  if (!tokenRow) {
     return { error: "Invalid or expired link." } as const;
   }
 
@@ -22,13 +17,8 @@ async function resolveToken(token: string) {
     return { error: "Session mismatch." } as const;
   }
 
-  const { data: video, error: videoError } = await supabaseServer
-    .from("videos")
-    .select("drive_file_id")
-    .eq("id", tokenRow.video_id)
-    .single();
-
-  if (videoError || !video) {
+  const video = await getVideoById(tokenRow.video_id);
+  if (!video) {
     return { error: "Video not found." } as const;
   }
 

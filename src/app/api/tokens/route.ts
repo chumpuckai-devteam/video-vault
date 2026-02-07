@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "../../../lib/supabaseServer";
+import { createVideoToken } from "../../../lib/firestore";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -10,15 +10,13 @@ export async function POST(request: NextRequest) {
   }
 
   const token = crypto.randomUUID();
-  const { data, error } = await supabaseServer
-    .from("video_tokens")
-    .insert({ token, video_id: videoId })
-    .select("token,video_id,session_id,created_at")
-    .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    await createVideoToken({ token, video_id: videoId });
+  } catch (error) {
+    console.error("Firestore token insert error", error);
+    return NextResponse.json({ error: "Failed to create token" }, { status: 500 });
   }
 
-  return NextResponse.json({ token: data?.token });
+  return NextResponse.json({ token });
 }

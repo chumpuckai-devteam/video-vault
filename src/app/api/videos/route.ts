@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseServer } from "../../../lib/supabaseServer";
 import { extractDriveFileId } from "../../../lib/drive";
 import { buildDriveViewUrl } from "../../../lib/googleDrive";
+import { createVideo, listVideos } from "../../../lib/firestore";
 
 export async function GET() {
-  const { data, error } = await supabaseServer
-    .from("videos")
-    .select("id,title,drive_file_id,drive_url,created_at")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Supabase fetch error", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  try {
+    const videos = await listVideos();
+    return NextResponse.json({ videos });
+  } catch (error) {
+    console.error("Firestore fetch error", error);
+    return NextResponse.json({ error: "Failed to fetch videos" }, { status: 500 });
   }
-
-  return NextResponse.json({ videos: data ?? [] });
 }
 
 export async function POST(request: NextRequest) {
@@ -36,20 +32,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid Google Drive link." }, { status: 400 });
   }
 
-  const { data, error } = await supabaseServer
-    .from("videos")
-    .insert({
+  try {
+    const video = await createVideo({
       title,
       drive_file_id: fileId,
       drive_url: driveUrl,
-    })
-    .select("id,title,drive_file_id,drive_url,created_at")
-    .single();
+    });
 
-  if (error) {
-    console.error("Supabase insert error", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ video });
+  } catch (error) {
+    console.error("Firestore insert error", error);
+    return NextResponse.json({ error: "Failed to add video" }, { status: 500 });
   }
-
-  return NextResponse.json({ video: data });
 }

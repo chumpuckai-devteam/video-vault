@@ -4,7 +4,7 @@ Controlled Google Drive video sharing with session-locked secure links.
 
 ## Requirements
 - Node.js 22+
-- Supabase or local PostgreSQL (Supabase recommended)
+- Firebase project with Firestore enabled
 
 ## Setup
 
@@ -18,13 +18,17 @@ Controlled Google Drive video sharing with session-locked secure links.
    cp .env.example .env
    ```
 
-3. Create database schema:
-   - In Supabase SQL editor (or local Postgres), run `supabase/schema.sql`.
+3. Configure Firebase:
+   - Create or select a Firebase project.
+   - Enable **Firestore** in Native mode.
+   - Create a **Service Account** in Google Cloud Console → IAM & Admin → Service Accounts.
+   - Download the JSON key.
+   - Add the JSON content to `.env` as `FIREBASE_SERVICE_ACCOUNT_JSON` (or set `FIREBASE_SERVICE_ACCOUNT_JSON_PATH`).
 
 4. Add environment values in `.env`:
    ```bash
-   SUPABASE_URL=your_supabase_project_url
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   FIREBASE_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
+   # FIREBASE_SERVICE_ACCOUNT_JSON_PATH=/path/to/firebase-service-account.json
    APP_URL=http://localhost:3000
 
    # Paste the full JSON from the service account key OR provide a path.
@@ -36,6 +40,20 @@ Controlled Google Drive video sharing with session-locked secure links.
    ```bash
    npm run dev
    ```
+
+## Firestore Collections
+
+- `videos`
+  - `title` (string | null)
+  - `drive_file_id` (string)
+  - `drive_url` (string)
+  - `created_at` (timestamp)
+
+- `video_tokens`
+  - `token` (string, doc id)
+  - `video_id` (string)
+  - `session_id` (string | null)
+  - `created_at` (timestamp)
 
 ## Google Drive Service Account Setup
 
