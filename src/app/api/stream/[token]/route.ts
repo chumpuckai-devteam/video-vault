@@ -5,10 +5,19 @@ import { getDriveAccessToken } from "../../../../lib/googleDrive";
 
 export const runtime = "nodejs";
 
+function isExpired(expiresAtIso: string | null | undefined) {
+  if (!expiresAtIso) return false;
+  return new Date(expiresAtIso).getTime() <= Date.now();
+}
+
 async function resolveToken(token: string) {
   const tokenRow = await getVideoToken(token);
-  if (!tokenRow) {
+  if (!tokenRow || tokenRow.revoked_at) {
     return { error: "Invalid or expired link." } as const;
+  }
+
+  if (isExpired(tokenRow.expires_at)) {
+    return { error: "Link expired." } as const;
   }
 
   const cookieStore = await cookies();

@@ -11,6 +11,10 @@ export type TokenRecord = {
   video_id: string;
   session_id: string | null;
   created_at: string;
+  expires_at: string;
+  revoked_at: string | null;
+  max_sessions: number;
+  session_count: number;
 };
 
 export type DriveFile = {

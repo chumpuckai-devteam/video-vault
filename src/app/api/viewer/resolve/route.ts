@@ -7,6 +7,11 @@ async function getSessionId() {
   return cookieStore.get("vv_session")?.value ?? null;
 }
 
+function isExpired(expiresAtIso: string | null | undefined) {
+  if (!expiresAtIso) return false;
+  return new Date(expiresAtIso).getTime() <= Date.now();
+}
+
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
   if (!token) {
@@ -14,8 +19,12 @@ export async function GET(request: NextRequest) {
   }
 
   const tokenRow = await getVideoToken(token);
-  if (!tokenRow) {
+  if (!tokenRow || tokenRow.revoked_at) {
     return NextResponse.json({ error: "Invalid or expired link." }, { status: 404 });
+  }
+
+  if (isExpired(tokenRow.expires_at)) {
+    return NextResponse.json({ error: "This link has expired." }, { status: 403 });
   }
 
   let sessionId = await getSessionId();

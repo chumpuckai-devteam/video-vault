@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { extractDriveFileId } from "../../../lib/drive";
 import { buildDriveViewUrl } from "../../../lib/googleDrive";
-import { createVideo, listVideos } from "../../../lib/firestore";
+import { createVideo, listVideos, listVideoTokensByVideoId } from "../../../lib/firestore";
 
 export async function GET() {
   try {
     const videos = await listVideos();
-    return NextResponse.json({ videos });
+    const tokens = await Promise.all(
+      videos.map((video) => listVideoTokensByVideoId(video.id))
+    );
+    const videoRows = videos.map((video, index) => ({
+      ...video,
+      tokens: tokens[index] ?? [],
+    }));
+
+    return NextResponse.json({ videos: videoRows });
   } catch (error) {
     console.error("Firestore fetch error", error);
     return NextResponse.json({ error: "Failed to fetch videos" }, { status: 500 });
